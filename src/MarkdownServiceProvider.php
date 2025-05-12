@@ -169,7 +169,17 @@ class MarkdownServiceProvider extends ServiceProvider
         $this->app->singleton('markdown.environment', function (Container $app): Environment {
             $config = $app->config->get('markdown');
 
-            $environment = new Environment(Arr::except($config, ['extensions', 'views']));
+            $commonmarkOptions = $config;
+
+            if (isset($commonmarkOptions['embed'])) {
+                $commonmarkOptions['embed']['adapter'] = $this->getClassInstance($commonmarkOptions['embed']['adapter']);
+            }
+
+            foreach ($commonmarkOptions['embeds'] ?? [] as $i => $embed) {
+                $commonmarkOptions['embeds'][$i] = $this->getClassInstance($embed);
+            }
+
+            $environment = new Environment(Arr::except($commonmarkOptions, ['extensions', 'views']));
 
             foreach ((array) Arr::get($config, 'extensions') as $extension) {
                 $environment->addExtension($app->make($extension));
@@ -182,6 +192,15 @@ class MarkdownServiceProvider extends ServiceProvider
         $this->app->alias('markdown.environment', EnvironmentInterface::class);
         $this->app->alias('markdown.environment', EnvironmentBuilderInterface::class);
     }
+
+    protected function getClassInstance($class)
+    {
+        if (is_string($class) && class_exists($class)) {
+            $class = new $class();
+        }
+        return $class;
+    }
+
 
     /**
      * Register the markdowm class.
