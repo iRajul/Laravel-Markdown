@@ -4,6 +4,8 @@ CHANGE LOG
 
 ## V16.1 (19/03/2026)
 
+* Support only PHP 8.2-8.5
+* Support only Laravel 12-13
 * Add PHP 8.5 support
 * Add Laravel 13 support
 * Switched to Commonmark ^2.8.2
